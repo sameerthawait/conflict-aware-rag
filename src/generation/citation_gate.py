@@ -177,7 +177,7 @@ class CitationPreflightGate:
                 temperature=self.temperature,
                 max_tokens=self.config.get("llm", {}).get("max_tokens_to_sample", 1024)
             )
-            response_text = response.choices[0].message.content.strip()
+            response_text = (response.choices[0].message.content or "").strip()
             
             # Parse components
             verdict, reason, gaps = self._parse_preflight_response(response_text)

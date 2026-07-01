@@ -144,7 +144,7 @@ class SemanticQueryCache:
                 try:
                     payload = self.redis_client.get(f"cache:entry:{best_cid}")
                     if payload:
-                        return json.loads(payload)
+                        return json.loads(str(payload))
                 except Exception as e:
                     logger.error(f"Failed to fetch cached entry from Redis: {str(e)}. Using memory fallback.")
 
@@ -237,7 +237,7 @@ class SemanticQueryCache:
         # Clear Redis keys
         if self.redis_client:
             try:
-                keys = self.redis_client.keys("cache:entry:*")
+                keys = list(self.redis_client.keys("cache:entry:*"))
                 if keys:
                     self.redis_client.delete(*keys)
                 logger.info("Successfully flushed Redis cache entries.")

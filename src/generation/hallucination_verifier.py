@@ -207,7 +207,7 @@ class HallucinationVerifier:
                 temperature=self.temperature,
                 max_tokens=self.config.get("llm", {}).get("max_tokens_to_sample", 1024)
             )
-            response_text = response.choices[0].message.content
+            response_text = response.choices[0].message.content or ""
 
             # Parse results
             verdict, claims_audit, inferred_flags = self._parse_verification_response(response_text)

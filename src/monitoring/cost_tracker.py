@@ -166,7 +166,8 @@ class CostTracker:
                 pipe.expire(d_key, 172800)
                 pipe.expire(m_key, 5184000)
                 
-                daily_used, monthly_used, _, _ = pipe.execute()
+                results = pipe.execute()
+                daily_used, monthly_used = int(results[0]), int(results[1])
             except Exception as e:
                 logger.error(f"Redis usage recording failed: {str(e)}.")
                 daily_used = 0  # Trigger fallback

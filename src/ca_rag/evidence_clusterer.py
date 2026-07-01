@@ -216,7 +216,7 @@ class EvidenceClusterer:
                 response_format={"type": "json_object"}
             )
             
-            data = json.loads(response.choices[0].message.content.strip())
+            data = json.loads((response.choices[0].message.content or "").strip())
             label = data.get("label", "Supports a general position").strip()
             stance_str = data.get("stance", "NEUTRAL").upper()
             summary = data.get("summary", "").strip()
@@ -263,7 +263,8 @@ class EvidenceClusterer:
         if n < 2:
             return 1.0
             
-        nli_map = {}
+        from src.ca_rag.nli_detector import NLIResult as _NLIResult
+        nli_map: dict[tuple[str, str], _NLIResult] = {}
         for nli_res in nli_matrix.results:
             nli_map[(nli_res.claim_a_id, nli_res.claim_b_id)] = nli_res
             nli_map[(nli_res.claim_b_id, nli_res.claim_a_id)] = nli_res
@@ -272,10 +273,10 @@ class EvidenceClusterer:
         for i in range(n):
             for j in range(i + 1, n):
                 c1, c2 = claims[i], claims[j]
-                nli_res = nli_map.get((c1.claim_id, c2.claim_id))
-                if nli_res:
-                    fwd_ent = nli_res.forward_scores.get(NLILabel.ENTAILMENT.value, 0.0)
-                    bwd_ent = nli_res.backward_scores.get(NLILabel.ENTAILMENT.value, 0.0)
+                nli_lookup = nli_map.get((c1.claim_id, c2.claim_id))
+                if nli_lookup:
+                    fwd_ent = nli_lookup.forward_scores.get(NLILabel.ENTAILMENT.value, 0.0)
+                    bwd_ent = nli_lookup.backward_scores.get(NLILabel.ENTAILMENT.value, 0.0)
                     entailment_scores.append(max(fwd_ent, bwd_ent))
                 else:
                     # Fallback to cosine embedding similarity

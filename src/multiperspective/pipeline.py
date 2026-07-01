@@ -280,7 +280,7 @@ class MultiPerspectiveRAGPipeline(RAGPipeline):
             temperature=temperature
         )
         
-        answer_text = response.choices[0].message.content.strip()
+        answer_text = (response.choices[0].message.content or "").strip()
         latencies["multi_perspective_synthesis_ms"] = (time.perf_counter() - synth_start) * 1000
 
         # Step 8: Hallucination Verification
@@ -348,7 +348,7 @@ class MultiPerspectiveRAGPipeline(RAGPipeline):
                 temperature=temperature
             )
             
-            return response.choices[0].message.content.strip()
+            return (response.choices[0].message.content or "").strip()
             
         except Exception as e:
             logger.error(f"Failed to generate disagreement explanation: {str(e)}")

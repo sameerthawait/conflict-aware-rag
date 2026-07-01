@@ -169,7 +169,7 @@ class IngestionPipeline:
                         temperature=self.chunker.temperature,
                         max_tokens=self.chunker.max_tokens_to_sample
                     )
-                    document_summary = response.choices[0].message.content.strip()
+                    document_summary = (response.choices[0].message.content or "").strip()
                 except Exception as ex:
                     logger.warning(f"Failed to generate global doc summary: {str(ex)}")
 

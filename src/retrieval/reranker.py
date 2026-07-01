@@ -152,7 +152,7 @@ class Reranker:
                     temperature=self.temperature,
                     max_tokens=16
                 )
-                response_text = response.choices[0].message.content.strip()
+                response_text = (response.choices[0].message.content or "").strip()
                 
                 # Parse float score from output
                 # Expecting exactly a float between 0.0 and 10.0

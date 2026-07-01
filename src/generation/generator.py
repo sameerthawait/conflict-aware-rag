@@ -192,7 +192,7 @@ class Generator:
                 temperature=self.temperature,
                 max_tokens=self.max_tokens
             )
-            response_text = response.choices[0].message.content
+            response_text = response.choices[0].message.content or ""
 
             # Parse segments
             gen_response = self._parse_response(response_text)

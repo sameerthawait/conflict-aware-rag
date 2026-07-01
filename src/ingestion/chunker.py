@@ -68,7 +68,7 @@ class SemanticChunker:
                 max_tokens=self.max_tokens_to_sample,
                 timeout=10
             )
-            return response.choices[0].message.content.strip()
+            return (response.choices[0].message.content or "").strip()
         except Exception as e:
             logger.warning(f"Summary skipped: {str(e)}")
             return ""

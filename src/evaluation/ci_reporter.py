@@ -121,7 +121,7 @@ class CIReporter:
                 temperature=self.temperature,
                 max_tokens=self.config.get("llm", {}).get("max_tokens_to_sample", 1024)
             )
-            return response.choices[0].message.content.strip()
+            return (response.choices[0].message.content or "").strip()
 
         except Exception as e:
             logger.error(f"Failed to generate failure report via LLM: {str(e)}")

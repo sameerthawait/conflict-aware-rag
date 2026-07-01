@@ -248,7 +248,7 @@ class RAGPipeline:
                     temperature=temperature,
                     max_tokens=max_tokens
                 )
-                answer_text = response.choices[0].message.content.strip()
+                answer_text = (response.choices[0].message.content or "").strip()
                 generation_ms = (time.perf_counter() - gen_start) * 1000
                 latencies["generation_ms"] = generation_ms
                 

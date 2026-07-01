@@ -211,7 +211,7 @@ class CARAGGenerator:
         )
         breakdown["llm_generation_ms"] = int((time.perf_counter() - llm_start) * 1000)
 
-        full_answer = response.choices[0].message.content.strip()
+        full_answer = (response.choices[0].message.content or "").strip()
 
         # Parse sections
         supporting = self._parse_section(full_answer, "SUPPORTING EVIDENCE")
@@ -396,7 +396,7 @@ class CARAGGenerator:
                 response_format={"type": "json_object"}
             )
 
-            data = json.loads(response.choices[0].message.content.strip())
+            data = json.loads((response.choices[0].message.content or "").strip())
             
             return ConflictExplanation(
                 primary_reason=data.get("primary_reason", "METHODOLOGICAL"),

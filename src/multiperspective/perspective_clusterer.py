@@ -130,7 +130,7 @@ class PerspectiveClusterer:
                 response_format={"type": "json_object"}
             )
             
-            output_text = response.choices[0].message.content.strip()
+            output_text = (response.choices[0].message.content or "").strip()
             data = json.loads(output_text)
             
             position = data.get("position", "").strip()

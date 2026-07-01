@@ -162,7 +162,7 @@ class ResilientLLMClient:
                 self._record_success()
                 
                 latency_ms = (time.perf_counter() - start_time) * 1000
-                response_text = response.choices[0].message.content
+                response_text = response.choices[0].message.content or ""
                 
                 # Extract token metrics (or mock if omitted in client response)
                 usage = response.usage

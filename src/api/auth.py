@@ -150,9 +150,8 @@ class RateLimiter:
             try:
                 tpd_key = f"ratelimit:{key_hash}:tpd"
                 self.redis_client.incrby(tpd_key, token_count)
-                # Set expire to end of day (86400 seconds) if first time
-                if self.redis_client.ttl(tpd_key) == -1:
-                    self.redis_client.expire(tpd_key, 86400)
+                # Set TTL to end of day (86400 seconds) on first write
+                self.redis_client.expire(tpd_key, 86400)
                 return
             except Exception as e:
                 logger.error(f"Redis token recording failed: {str(e)}.")

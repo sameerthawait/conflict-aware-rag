@@ -188,7 +188,7 @@ class ContradictionDetector:
                 response_format={"type": "json_object"}
             )
             
-            output_text = response.choices[0].message.content.strip()
+            output_text = (response.choices[0].message.content or "").strip()
             data = json.loads(output_text)
             
             is_contradiction = bool(data.get("is_contradiction", False))

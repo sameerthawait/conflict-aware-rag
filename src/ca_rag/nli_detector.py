@@ -199,7 +199,7 @@ Respond ONLY with JSON format containing the scores (they must sum to 1.0):
                 temperature=0.0,
                 response_format={"type": "json_object"}
             )
-            data = json.loads(response.choices[0].message.content.strip())
+            data = json.loads((response.choices[0].message.content or "").strip())
             return {
                 NLILabel.ENTAILMENT.value: float(data.get("entailment", 0.0)),
                 NLILabel.CONTRADICTION.value: float(data.get("contradiction", 0.0)),

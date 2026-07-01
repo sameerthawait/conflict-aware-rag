@@ -120,7 +120,7 @@ class QueryExpander:
                 temperature=self.temperature,
                 max_tokens=self.max_tokens_to_sample
             )
-            return response.choices[0].message.content.strip()
+            return (response.choices[0].message.content or "").strip()
         except Exception as e:
             error_msg = f"LLM API request failed: {str(e)}"
             logger.error(error_msg)

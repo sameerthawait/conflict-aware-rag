@@ -87,7 +87,9 @@ Respond strictly in valid JSON format with this structure:
                 temperature=0.0,
                 response_format={"type": "json_object"}
             )
-            scores = json.loads(judge_res.choices[0].message.content)
+            content = judge_res.choices[0].message.content
+            assert isinstance(content, (str, bytes, bytearray)), "LLM response must be JSON string"
+            scores = json.loads(content)
         except Exception as e:
             logger.error(f"LLM-as-a-judge scoring failed: {str(e)}")
             scores = {

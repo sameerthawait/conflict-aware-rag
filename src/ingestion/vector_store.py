@@ -1,7 +1,8 @@
 import os
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Mapping
 import chromadb
+import chromadb.api
 from sentence_transformers import SentenceTransformer
 from src.ingestion.chunker import Chunk
 
@@ -53,7 +54,7 @@ class ChromaVectorStore:
         embed_conf = config.get("embeddings", {})
         self.embedding_model_name: str = embed_conf.get("model_name", "sentence-transformers/all-mpnet-base-v2")
 
-        self.client: Optional[chromadb.PersistentClient] = None
+        self.client: Optional[chromadb.api.ClientAPI] = None
         self.collection: Optional[chromadb.Collection] = None
         self.embedding_model: Optional[SentenceTransformer] = None
 
@@ -116,7 +117,7 @@ class ChromaVectorStore:
         logger.info(f"Indexing {len(chunks)} chunks into ChromaDB...")
         ids: List[str] = []
         documents: List[str] = []
-        metadatas: List[Dict[str, Any]] = []
+        metadatas: List[Mapping[str, str | int | float | bool]] = []
         texts_to_embed: List[str] = []
 
         for chunk in chunks:

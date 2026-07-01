@@ -145,7 +145,7 @@ class ClaimExtractor:
                 response_format={"type": "json_object"}
             )
 
-            content = response.choices[0].message.content.strip()
+            content = (response.choices[0].message.content or "").strip()
             # Handle possible markdown json formatting blocks
             if content.startswith("```"):
                 lines = content.splitlines()

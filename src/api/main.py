@@ -4,7 +4,7 @@ try:
     if not hasattr(pytree, 'register_pytree_node'):
         def register_pytree_node(type_to_register, flatten_fn, unflatten_fn, *args, **kwargs):
             return pytree._register_pytree_node(type_to_register, flatten_fn, unflatten_fn)
-        pytree.register_pytree_node = register_pytree_node
+        pytree.register_pytree_node = register_pytree_node  # type: ignore[assignment]
 except ImportError:
     pass
 
@@ -673,13 +673,14 @@ def run_contradiction_benchmark_endpoint(
         detector = multi_perspective_pipeline.contradiction_detector
         res = benchmark.run(detector)
         
+        from src.api.models import CategoryMetric
         type_metrics_dict = {}
         for category, metrics in res.type_metrics.items():
-            type_metrics_dict[category] = {
-                "precision": metrics["precision"],
-                "recall": metrics["recall"],
-                "f1": metrics["f1"]
-            }
+            type_metrics_dict[category] = CategoryMetric(
+                precision=metrics["precision"],
+                recall=metrics["recall"],
+                f1=metrics["f1"]
+            )
 
         return ContradictionBenchmarkResponse(
             total_cases=res.total_cases,
@@ -1095,9 +1096,9 @@ def ca_rag_feedback(
 
 @app.get("/ca-rag/analytics")
 def ca_rag_analytics(
-    x_api_key: str = Depends(authenticator.authenticate_key)
+    key_info: Dict[str, Any] = Depends(authenticator.authenticate)
 ) -> Dict[str, Any]:
-    if x_api_key.get("tier") != "premium":
+    if key_info.get("tier") != "premium":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Administrative privileges required to access analytics dashboard."
