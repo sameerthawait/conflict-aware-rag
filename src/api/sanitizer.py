@@ -1,6 +1,6 @@
 import re
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 # Define audit logging stream
 audit_logger = logging.getLogger("rag_system.audit.sanitizer")
