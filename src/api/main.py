@@ -9,7 +9,6 @@ except ImportError:
     pass
 
 from dotenv import load_dotenv
-load_dotenv()
 import logging
 import os
 import asyncio
@@ -19,6 +18,7 @@ from datetime import datetime
 import numpy as np
 from typing import Dict, Any, Optional, List, Union
 from fastapi import FastAPI, HTTPException, status, Depends, Request
+from fastapi.responses import JSONResponse
 from openai import OpenAI
 
 from src.ca_rag.ca_rag_generator import CARAGResponse
@@ -58,7 +58,7 @@ from src.api.models import (
 # Phase 4 Imports
 from src.api.auth import Authenticator
 from src.api.middleware import ProductionMiddleware
-from src.api.sanitizer import QuerySanitizer, PromptInjectionDetector
+from src.api.sanitizer import QuerySanitizer, PromptInjectionDetector, SanitizationError
 from src.api.fingerprint import RequestFingerprinter
 from src.retrieval.vector_store_pool import VectorStorePool, PooledChromaVectorStore
 from src.generation.llm_client import ResilientLLMClient, ResilientOpenAIWrapper
@@ -68,12 +68,16 @@ from src.monitoring.metrics import mount_metrics_app
 from src.monitoring.health import router as health_router
 from src.monitoring.cost_tracker import router as cost_router, BudgetExceededError
 import src.monitoring.cost_tracker as cost_tracker_mod
+from src.utils.secret_masker import install_secret_masker
+from src.api.response_filter import ResponseFilterMiddleware
+
+# Load environment variables
+load_dotenv()
 
 # Initialize system logger
 logger = logging.getLogger("rag_system.api.main")
 
 # Install secret masker ASAP so all downstream loggers redact credentials
-from src.utils.secret_masker import install_secret_masker
 install_secret_masker()
 
 # Create FastAPI application
@@ -85,16 +89,11 @@ app = FastAPI(
 
 # Enforce Request Tracking, Size Limits, and Latency Headers Middleware
 app.add_middleware(ProductionMiddleware)
-
-from src.api.response_filter import ResponseFilterMiddleware
 app.add_middleware(ResponseFilterMiddleware)
 
 # Register Health Probes and Cost Control Sub-Routers
 app.include_router(health_router)
 app.include_router(cost_router)
-
-from fastapi.responses import JSONResponse
-from src.api.sanitizer import SanitizationError
 
 @app.exception_handler(SanitizationError)
 async def sanitization_exception_handler(request: Request, exc: SanitizationError):
