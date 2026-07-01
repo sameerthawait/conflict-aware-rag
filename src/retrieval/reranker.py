@@ -1,6 +1,7 @@
 import time
 import logging
 import math
+import re
 from typing import List, Dict, Any, Optional
 from openai import OpenAI
 from src.ingestion.vector_store import SearchResult
@@ -238,4 +239,4 @@ class Reranker:
             f"Filtered candidates from {len(results)} to {len(filtered_results)} based on min_score threshold ({self.min_score})."
         )
         return filtered_results
-import re
+

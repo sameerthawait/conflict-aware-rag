@@ -13,10 +13,15 @@ load_dotenv()
 import logging
 import os
 import asyncio
+import time
+import uuid
+from datetime import datetime
+import numpy as np
 from typing import Dict, Any, Optional, List, Union
 from fastapi import FastAPI, HTTPException, status, Depends, Request
 from openai import OpenAI
 
+from src.ca_rag.ca_rag_generator import CARAGResponse
 from src.utils.config_loader import load_config
 from src.utils.prompt_manager import PromptManager
 from src.ingestion.document_loader import DocumentLoader

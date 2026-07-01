@@ -32,7 +32,7 @@ async def main():
     prompt_manager = PromptManager(config.get("system", {}).get("prompts_config_path", "prompts/prompts.yaml"))
     
     # 2. Initialize vector store pool and wrapper
-    from src.retrieval.vector_store_pool import VectorStorePool, PooledChromaVectorStore
+    from src.retrieval.vector_store_pool import VectorStorePool
     pool = VectorStorePool(config)
     vector_store = PooledChromaVectorStore(pool)
     

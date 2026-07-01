@@ -1,11 +1,12 @@
-from dotenv import load_dotenv
-load_dotenv()
 import os
 import re
 import logging
 from functools import lru_cache
 from typing import Any, Dict
 import yaml
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Initialize structured logging
 logger = logging.getLogger("rag_system.utils.config_loader")

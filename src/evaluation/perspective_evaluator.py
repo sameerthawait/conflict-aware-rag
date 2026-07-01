@@ -151,25 +151,29 @@ Respond strictly in valid JSON format with this structure:
         sc_thresh = self.mp_thresholds.get("stance_coverage", 4.0)
         sc_passed = avg_stance_coverage >= sc_thresh
         threshold_results["stance_coverage"] = {"score": avg_stance_coverage, "threshold": sc_thresh, "passed": sc_passed}
-        if not sc_passed: passed = False
+        if not sc_passed:
+            passed = False
 
         # Check disagreement calibration
         dc_thresh = self.mp_thresholds.get("disagreement_calibration", 3.8)
         dc_passed = avg_calibration >= dc_thresh
         threshold_results["disagreement_calibration"] = {"score": avg_calibration, "threshold": dc_thresh, "passed": dc_passed}
-        if not dc_passed: passed = False
+        if not dc_passed:
+            passed = False
 
         # Check citation quality
         cq_thresh = self.mp_thresholds.get("citation_quality", 4.0)
         cq_passed = avg_citation >= cq_thresh
         threshold_results["citation_quality"] = {"score": avg_citation, "threshold": cq_thresh, "passed": cq_passed}
-        if not cq_passed: passed = False
+        if not cq_passed:
+            passed = False
 
         # Check contradiction accuracy
         ca_thresh = self.mp_thresholds.get("contradiction_accuracy", 0.8)
         ca_passed = avg_contradiction_accuracy >= ca_thresh
         threshold_results["contradiction_accuracy"] = {"score": avg_contradiction_accuracy, "threshold": ca_thresh, "passed": ca_passed}
-        if not ca_passed: passed = False
+        if not ca_passed:
+            passed = False
 
         report = {
             "timestamp": datetime.now().isoformat(),

@@ -3,6 +3,7 @@ import os
 import logging
 import asyncio
 import hashlib
+import numpy as np
 from datetime import datetime
 from typing import Dict, List, Any, Tuple, Optional, Union
 from openai import OpenAI
