@@ -119,20 +119,20 @@ except Exception as e:
 # Initialize Authenticator at module level so FastAPI Depends(authenticator.authenticate) is valid at import time
 authenticator: Authenticator = Authenticator(config)
 
-prompt_manager: Optional[PromptManager] = None
-vector_store: Optional[PooledChromaVectorStore] = None
-rag_pipeline: Optional[RAGPipeline] = None
-ca_rag_pipeline: Optional[CARAGPipeline] = None
-multi_perspective_pipeline: Optional[Any] = None
-ingestion_pipeline: Optional[IngestionPipeline] = None
-client: Optional[ResilientOpenAIWrapper] = None
+prompt_manager: Any = None
+vector_store: Any = None
+rag_pipeline: Any = None
+ca_rag_pipeline: Any = None
+multi_perspective_pipeline: Any = None
+ingestion_pipeline: Any = None
+client: Any = None
 
 # Security, Queue, and Cache globals
-query_queue: Optional[QueryQueue] = None
-semantic_cache: Optional[SemanticQueryCache] = None
-sanitizer: Optional[QuerySanitizer] = None
-injection_detector: Optional[PromptInjectionDetector] = None
-fingerprinter: Optional[RequestFingerprinter] = None
+query_queue: Any = None
+semantic_cache: Any = None
+sanitizer: Any = None
+injection_detector: Any = None
+fingerprinter: Any = None
 
 
 @app.on_event("startup")

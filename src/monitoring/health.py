@@ -107,7 +107,7 @@ def detailed_diagnostics() -> Dict[str, Any]:
         ) if torch.cuda.is_available() else 0,
     }
 
-    details = {
+    details: Dict[str, Any] = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "status": "healthy",
         "components": {},
@@ -121,6 +121,7 @@ def detailed_diagnostics() -> Dict[str, Any]:
 
     # 1. ChromaDB status
     try:
+        assert vector_store is not None
         vector_store._ensure_initialized()
         stats = vector_store.get_collection_stats()
         details["components"]["chromadb"] = {

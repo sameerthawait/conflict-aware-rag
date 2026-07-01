@@ -86,7 +86,7 @@ class NLIContradictionDetector:
         self.contradiction_threshold = ca_config.get("contradiction_threshold", 0.55)
         
         self.model = None
-        self.label_mapping = {}
+        self.label_mapping: Dict[int, NLILabel] = {}
         self._init_nli_model()
 
     def _init_nli_model(self) -> None:
@@ -242,8 +242,8 @@ Respond ONLY with JSON format containing the scores (they must sum to 1.0):
             model_used = "LLM-fallback"
 
         # Determine best labels
-        fwd_label_str = max(fwd_scores, key=fwd_scores.get)
-        bwd_label_str = max(bwd_scores, key=bwd_scores.get)
+        fwd_label_str = max(fwd_scores, key=lambda k: fwd_scores[k])
+        bwd_label_str = max(bwd_scores, key=lambda k: bwd_scores[k])
         
         fwd_label = NLILabel(fwd_label_str.upper())
         bwd_label = NLILabel(bwd_label_str.upper())

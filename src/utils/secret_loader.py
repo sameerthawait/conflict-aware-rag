@@ -1,9 +1,10 @@
 import os
 import logging
+from typing import Optional
 
 logger = logging.getLogger("rag_system.utils.secret_loader")
 
-def get_secret(env_var_name: str, fallback_env_name: str = None, default: str = "") -> str:
+def get_secret(env_var_name: str, fallback_env_name: Optional[str] = None, default: str = "") -> str:
     """Loads a secret from a file path specified by an env var ending in '_FILE' (e.g., Docker Secrets)
 
     or falls back to direct environment variables.

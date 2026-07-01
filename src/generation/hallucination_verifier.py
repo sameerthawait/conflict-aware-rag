@@ -143,8 +143,8 @@ class HallucinationVerifier:
             response_text,
             re.IGNORECASE
         )
-        for c, s, e in claim_blocks:
-            claims_audit.append(ClaimAudit(c, s.lower() == "true", e.strip()))
+        for c, s, ev in claim_blocks:
+            claims_audit.append(ClaimAudit(c, s.lower() == "true", ev.strip()))
 
         return verdict, claims_audit, inferred_flags
 

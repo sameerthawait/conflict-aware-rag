@@ -107,6 +107,8 @@ class ChromaVectorStore:
             VectorStoreError: If batch database insertion fails.
         """
         self._ensure_initialized()
+        assert self.embedding_model is not None
+        assert self.collection is not None
         if not chunks:
             logger.warning("No chunks provided to index.")
             return
@@ -152,6 +154,7 @@ class ChromaVectorStore:
             A dictionary containing stat metrics (e.g. 'count').
         """
         self._ensure_initialized()
+        assert self.collection is not None
         try:
             count = self.collection.count()
             return {"count": count, "collection_name": self.collection_name}
@@ -170,6 +173,7 @@ class ChromaVectorStore:
             VectorStoreError: If deletion transaction fails.
         """
         self._ensure_initialized()
+        assert self.collection is not None
         logger.info(f"Deleting document chunks for doc_id: {doc_id}")
         try:
             # Delete entries matching metadata filter
@@ -194,6 +198,8 @@ class ChromaVectorStore:
             VectorStoreError: If query execution fails.
         """
         self._ensure_initialized()
+        assert self.embedding_model is not None
+        assert self.collection is not None
         logger.info(f"Performing similarity search for query (k={k})...")
         try:
             query_embeddings = self.embedding_model.encode([query]).tolist()

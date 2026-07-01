@@ -113,6 +113,7 @@ class IngestionPipeline:
         """
         try:
             self.vector_store._ensure_initialized()
+            assert self.vector_store.collection is not None
             existing = self.vector_store.collection.get(where={"doc_id": doc_id}, limit=1)
             return len(existing.get("ids", [])) > 0
         except Exception as e:
@@ -129,9 +130,9 @@ class IngestionPipeline:
             An IngestionResult object detailing counts and errors.
         """
         logger.info(f"Starting ingestion process for file: {path}")
-        indexed = []
+        indexed: List[str] = []
         skipped = []
-        errors = {}
+        errors: Dict[str, str] = {}
         total_chunks = 0
 
         doc_id = self._generate_doc_id(path)
@@ -273,6 +274,7 @@ class IngestionPipeline:
         """
         logger.info(f"Attempting to reindex doc_id: {doc_id}")
         self.vector_store._ensure_initialized()
+        assert self.vector_store.collection is not None
 
         try:
             # Query collection to retrieve metadata path

@@ -88,9 +88,9 @@ class EvidenceClusterer:
         
         # Mapping from claim pairs to their NLI results
         nli_map = {}
-        for res in nli_matrix.results:
-            nli_map[(res.claim_a_id, res.claim_b_id)] = res
-            nli_map[(res.claim_b_id, res.claim_a_id)] = res
+        for nli_res in nli_matrix.results:
+            nli_map[(nli_res.claim_a_id, nli_res.claim_b_id)] = nli_res
+            nli_map[(nli_res.claim_b_id, nli_res.claim_a_id)] = nli_res
 
         for i in range(n):
             for j in range(n):
@@ -264,18 +264,18 @@ class EvidenceClusterer:
             return 1.0
             
         nli_map = {}
-        for res in nli_matrix.results:
-            nli_map[(res.claim_a_id, res.claim_b_id)] = res
-            nli_map[(res.claim_b_id, res.claim_a_id)] = res
+        for nli_res in nli_matrix.results:
+            nli_map[(nli_res.claim_a_id, nli_res.claim_b_id)] = nli_res
+            nli_map[(nli_res.claim_b_id, nli_res.claim_a_id)] = nli_res
 
         entailment_scores = []
         for i in range(n):
             for j in range(i + 1, n):
                 c1, c2 = claims[i], claims[j]
-                res = nli_map.get((c1.claim_id, c2.claim_id))
-                if res:
-                    fwd_ent = res.forward_scores.get(NLILabel.ENTAILMENT.value, 0.0)
-                    bwd_ent = res.backward_scores.get(NLILabel.ENTAILMENT.value, 0.0)
+                nli_res = nli_map.get((c1.claim_id, c2.claim_id))
+                if nli_res:
+                    fwd_ent = nli_res.forward_scores.get(NLILabel.ENTAILMENT.value, 0.0)
+                    bwd_ent = nli_res.backward_scores.get(NLILabel.ENTAILMENT.value, 0.0)
                     entailment_scores.append(max(fwd_ent, bwd_ent))
                 else:
                     # Fallback to cosine embedding similarity
@@ -311,7 +311,7 @@ class EvidenceClusterer:
         labels = self.spectral_cluster(affinity, n_claims)
 
         # 2. Form initial clusters
-        raw_clusters = {}
+        raw_clusters: Dict[int, List[Claim]] = {}
         for idx, label_id in enumerate(labels):
             if label_id not in raw_clusters:
                 raw_clusters[label_id] = []

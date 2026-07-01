@@ -153,6 +153,7 @@ class BM25Retriever:
         try:
             self.vector_store._ensure_initialized()
             # Fetch all stored records from ChromaDB
+            assert self.vector_store.collection is not None
             results = self.vector_store.collection.get(include=["documents", "metadatas"])
         except Exception as e:
             raise RetrievalError(f"Failed to fetch chunks from ChromaDB to build BM25 index: {str(e)}") from e

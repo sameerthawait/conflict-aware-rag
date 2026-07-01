@@ -107,7 +107,7 @@ class CARAGPipeline(RAGPipeline):
         if len(all_claims) < self.min_claims:
             logger.info(f"CA-RAG Fallback: Extracted claim count ({len(all_claims)}) is below minimum ({self.min_claims}). Triggering standard RAG.")
             fallback_res = super().run_pipeline(user_query)
-            fallback_res.latencies["fallback_reason"] = "insufficient_claims"
+            fallback_res.latencies["fallback_reason"] = "insufficient_claims"  # type: ignore[assignment]
             return fallback_res
 
         # 4. Perform NLI Contradiction Detection
@@ -120,14 +120,14 @@ class CARAGPipeline(RAGPipeline):
         if not nli_matrix.has_contradictions:
             logger.info("CA-RAG Fallback: No contradictions found among claims. Triggering standard RAG.")
             fallback_res = super().run_pipeline(user_query)
-            fallback_res.latencies["fallback_reason"] = "no_contradictions"
+            fallback_res.latencies["fallback_reason"] = "no_contradictions"  # type: ignore[assignment]
             return fallback_res
 
         # Fallback Trigger 3: Contradiction density below threshold
         if nli_matrix.contradiction_density < self.contra_density_threshold:
             logger.info(f"CA-RAG Fallback: Contradiction density ({nli_matrix.contradiction_density:.2f}) below threshold ({self.contra_density_threshold}). Triggering standard RAG.")
             fallback_res = super().run_pipeline(user_query)
-            fallback_res.latencies["fallback_reason"] = "low_contradiction_density"
+            fallback_res.latencies["fallback_reason"] = "low_contradiction_density"  # type: ignore[assignment]
             return fallback_res
 
         # 5. Stance Clustering
@@ -140,7 +140,7 @@ class CARAGPipeline(RAGPipeline):
         if len(clusters) < 2:
             logger.info(f"CA-RAG Fallback: Generated cluster count ({len(clusters)}) is below 2. Triggering standard RAG.")
             fallback_res = super().run_pipeline(user_query)
-            fallback_res.latencies["fallback_reason"] = "insufficient_clusters"
+            fallback_res.latencies["fallback_reason"] = "insufficient_clusters"  # type: ignore[assignment]
             return fallback_res
 
         # 6. Build Conflict Graph

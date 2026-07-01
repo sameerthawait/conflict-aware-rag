@@ -118,6 +118,7 @@ class GoldenDatasetGenerator:
         # 1. Fetch document chunks from database
         try:
             self.vector_store._ensure_initialized()
+            assert self.vector_store.collection is not None
             results = self.vector_store.collection.get(include=["documents"])
         except Exception as e:
             raise DatasetGeneratorError(f"Failed to retrieve chunks from ChromaDB: {str(e)}") from e

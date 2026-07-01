@@ -99,7 +99,7 @@ class QuerySanitizer:
 class PromptInjectionDetector:
     """Detects prompt injection attempts in user queries."""
 
-    def __init__(self, config: Dict[str, Any] = None) -> None:
+    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
         """Initializes the PromptInjectionDetector."""
         self._compiled_patterns = [re.compile(p, re.IGNORECASE) for p in INJECTION_PATTERNS]
 

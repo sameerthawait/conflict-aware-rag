@@ -1,5 +1,6 @@
 import logging
 import re
+from typing import List, Any
 
 class SecretMasker(logging.Filter):
     """Logging filter that redacts sensitive API keys and Bearer tokens from log outputs."""
@@ -14,7 +15,7 @@ class SecretMasker(logging.Filter):
         if isinstance(record.msg, str):
             record.msg = self.mask_text(record.msg)
         if record.args:
-            new_args = []
+            new_args: List[Any] = []
             for arg in record.args:
                 if isinstance(arg, str):
                     new_args.append(self.mask_text(arg))

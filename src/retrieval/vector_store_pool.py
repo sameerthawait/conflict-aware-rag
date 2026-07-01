@@ -111,6 +111,7 @@ class VectorStorePool:
                 raise VectorStorePoolError(f"Database connection offline: {str(e)}") from e
 
         try:
+            assert conn is not None
             yield conn
         finally:
             if conn:
@@ -126,22 +127,27 @@ class PooledCollection:
 
     def get(self, *args, **kwargs) -> Dict[str, Any]:
         with self.pool.get_connection() as conn:
+            assert conn.collection is not None
             return conn.collection.get(*args, **kwargs)
 
     def count(self, *args, **kwargs) -> int:
         with self.pool.get_connection() as conn:
+            assert conn.collection is not None
             return conn.collection.count(*args, **kwargs)
 
     def add(self, *args, **kwargs) -> None:
         with self.pool.get_connection() as conn:
+            assert conn.collection is not None
             return conn.collection.add(*args, **kwargs)
 
     def delete(self, *args, **kwargs) -> None:
         with self.pool.get_connection() as conn:
+            assert conn.collection is not None
             return conn.collection.delete(*args, **kwargs)
 
     def query(self, *args, **kwargs) -> Dict[str, Any]:
         with self.pool.get_connection() as conn:
+            assert conn.collection is not None
             return conn.collection.query(*args, **kwargs)
 
 

@@ -51,7 +51,7 @@ class PerspectiveEvaluator(RAGEvaluator):
         expected_disagreement = case.get("expected_disagreement_score", 0.0)
 
         # Run pipeline
-        response: MultiPerspectiveRAGResponse = await self.pipeline.query(query)
+        response: MultiPerspectiveRAGResponse = await self.pipeline.query(query)  # type: ignore[attr-defined]
 
         # Evaluate stance coverage and correctness via LLM-as-a-judge
         judge_prompt = f"""
@@ -115,7 +115,7 @@ Respond strictly in valid JSON format with this structure:
             "latency_ms": response.total_latency_ms
         }
 
-    async def run_evaluation(self, dataset_path: Optional[str] = None) -> Dict[str, Any]:
+    async def run_evaluation(self, dataset_path: Optional[str] = None) -> Dict[str, Any]:  # type: ignore[override]
         """Runs the entire evaluation suite over all loaded cases."""
         cases = self.load_mp_dataset(dataset_path)
         results = []
