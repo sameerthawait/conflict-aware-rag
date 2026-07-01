@@ -1,0 +1,18 @@
+[
+  {
+    "doc_id": "71dd73bc3ecb31805ec4acbb89c7ea0d8a528c3a62640ed55f13133b326d39c5",
+    "file_name": "requirements.txt",
+    "file_type": "txt",
+    "file_size_bytes": 426,
+    "chunks_count": 1,
+    "indexed_at": "2026-06-29T13:14:15.294Z"
+  },
+  {
+    "doc_id": "3afe2742b5cd17fa635f8ebf9ac35c1ba49af478cbb86242e2f668b678126af2",
+    "file_name": "robusta_no_cpu_limits.md",
+    "file_type": "md",
+    "file_size_bytes": 4405,
+    "chunks_count": 5,
+    "indexed_at": "2026-06-29T13:16:31.867Z"
+  }
+]

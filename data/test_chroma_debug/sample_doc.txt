@@ -1,0 +1,1 @@
+Hyperparameters are configurations that can be tuned to optimize vector retrieval search weights.

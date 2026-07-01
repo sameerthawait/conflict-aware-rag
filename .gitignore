@@ -1,0 +1,38 @@
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+data/chroma_db/
+logs/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+tests/
+scratch/
+
+# Agent internal memory & cache folders
+project-brain/
+.serena/
+.agents/
+
+# Local benchmarking & readiness verification scripts
+scripts/production_readiness_check.py
+scripts/measure_retrieval.py
+scripts/measure_contradiction.py
+scripts/measure_faithfulness.py
+scripts/measure_latency.py
+scripts/measure_reliability.py
+
+# Frontend dependencies and builds
+node_modules/
+frontend/node_modules/
+.next/
+frontend/.next/
+frontend/tsconfig.tsbuildinfo
+

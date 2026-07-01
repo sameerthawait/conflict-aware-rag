@@ -1,0 +1,46 @@
+[
+  {
+    "query": "What is the recommended daily dosage for drug AZD-9291 in NSCLC?",
+    "ground_truth_stances": [
+      "Oncology guidelines recommend 80mg daily for optimal efficacy.",
+      "Pulmonary toxicologists warn that 80mg is too toxic, recommending a limit of 40mg."
+    ],
+    "expected_disagreement_score": 8,
+    "has_contradiction": true
+  },
+  {
+    "query": "Is Delaware or New York law governing the partnership disputes?",
+    "ground_truth_stances": [
+      "The contract clause 12 specifies Delaware law and Wilmington venue.",
+      "The addendum clause 12 specifies New York law and Manhattan venue."
+    ],
+    "expected_disagreement_score": 9,
+    "has_contradiction": true
+  },
+  {
+    "query": "Should the government implement or abolish carbon taxes to achieve net-zero?",
+    "ground_truth_stances": [
+      "Climate Action Panel recommends increasing carbon taxes by 15% annually.",
+      "Tax Reform Institute recommends abolishing carbon taxes in favor of infrastructure subsidies."
+    ],
+    "expected_disagreement_score": 7,
+    "has_contradiction": true
+  },
+  {
+    "query": "What are the common side effects of Beta-blockers?",
+    "ground_truth_stances": [
+      "Common side effects include fatigue, cold extremities, and sleep disturbances."
+    ],
+    "expected_disagreement_score": 0,
+    "has_contradiction": false
+  },
+  {
+    "query": "Does sleep deprivation lead to insulin resistance?",
+    "ground_truth_stances": [
+      "Sleep deprivation under 6 hours increases insulin resistance by 40%.",
+      "No correlation was found between sleep duration and insulin sensitivity."
+    ],
+    "expected_disagreement_score": 8,
+    "has_contradiction": true
+  }
+]

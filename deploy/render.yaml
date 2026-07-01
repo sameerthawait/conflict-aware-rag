@@ -1,0 +1,48 @@
+services:
+  # 1. FastAPI Web Service
+  - type: web
+    name: rag-api
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: standard
+    healthCheckPath: /health/ready
+    envVars:
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: CHROMA_HOST
+        value: chromadb
+      - key: CHROMA_PORT
+        value: "8000"
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: rag-cache
+          property: connectionString
+      - key: LOG_LEVEL
+        value: INFO
+    disk:
+      name: api-data
+      mountPath: /app/data
+      sizeGB: 5
+
+  # 2. Chroma Vector DB Private Service (not exposed to public internet)
+  - type: pserv
+    name: chromadb
+    env: docker
+    dockerImage: chromadb/chroma:0.4.24
+    plan: standard
+    disk:
+      name: chroma-data
+      mountPath: /chroma/data
+      sizeGB: 10
+    envVars:
+      - key: IS_PERSISTENT
+        value: "TRUE"
+      - key: PERSIST_DIRECTORY
+        value: /chroma/data
+
+# 3. Managed Redis instance for cache and rate-limiting
+redis:
+  name: rag-cache
+  plan: standard
+  ipAllowList: [] # internal access only

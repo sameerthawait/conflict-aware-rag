@@ -1,0 +1,484 @@
+# RAG System Prompts Config
+
+chunking_context_bridge:
+  version: "1.0.0"
+  purpose: "Prepends high-level document title and summary context to a chunk to maintain retrieval coherence."
+  template: |
+    Document Title: {document_title}
+    Document Summary: {document_summary}
+    ---
+    {chunk_text}
+
+rag_system_prompt:
+  version: "2.0.0"
+  purpose: "Answers the user query using only the provided retrieval context snippets with structured output and citations."
+  template: |
+    You are a precise and truthful AI assistant. Answer the user query using only the provided context.
+    Identify sources using citations. Use the format [Source Title, Page X] when referencing information.
+    If the context does not contain the answer, reply with: {refusal_message}
+    Do not make up facts or use external knowledge.
+
+    Context:
+    {context}
+
+    Query: {query}
+
+    Output your response in this exact format:
+    ANSWER:
+    [Your detailed answer with citations]
+
+    SOURCES USED:
+    [List of sources and page numbers used, one per line]
+
+    CONFIDENCE:
+    [High, Medium, or Low]
+
+    MISSING INFORMATION:
+    [Detail any points of the query that could not be answered from the context, or write 'None']
+
+query_intent_classifier:
+  version: "1.0.0"
+  purpose: "Classifies query intent into RAG_REQUIRED or GENERAL_CONVERSATION."
+  template: |
+    Analyze the user query below and classify its intent.
+    If the query asks about specific names, quantities, actions, or factual details of any entities (e.g., "how much Teresa drank", "who is Marcus", "what happened in scenario 2"), respond with RAG_REQUIRED.
+    Only respond with GENERAL_CONVERSATION if the query is a pure greeting (e.g., "hello", "hi"), a direct instruction to the AI (e.g., "help me write a script", "summarize my previous message"), or generic conversational chit-chat (e.g., "how are you").
+
+    Query: {query}
+
+    Reply with exactly one word (RAG_REQUIRED or GENERAL_CONVERSATION) and nothing else.
+    Intent:
+
+chunk_summarizer:
+  version: "1.0.0"
+  purpose: "Generates a concise 1-2 sentence summary of a document chunk."
+  template: |
+    Summarize the following document chunk in 1 or 2 sentences. Highlight the primary topic and essential facts.
+
+    Chunk Text:
+    {chunk_text}
+
+    Summary:
+
+hybrid_retrieval_query_expansion:
+  version: "1.0.0"
+  purpose: "Expands the query into keywords and an optimized semantic query for hybrid search."
+  template: |
+    Analyze the user query and expand it into two components to optimize retrieval:
+    1. KEYWORDS: A comma-separated list of key terms, synonyms, and variations of names/terms.
+    2. SEMANTIC_QUERY: A rephrased search query optimized for dense vector/semantic search (keep it natural and focused).
+
+    User Query: {query}
+
+    Respond in this exact YAML format:
+    KEYWORDS: "comma-separated list"
+    SEMANTIC_QUERY: "rephrased query string"
+
+reranker_relevance_scoring:
+  version: "1.0.0"
+  purpose: "Scores the relevance of a document chunk to a query on a scale of 0 to 10."
+  template: |
+    Given the query and the document chunk, output a relevance score from 0.0 to 10.0, where 10.0 is extremely relevant and 0.0 is completely irrelevant.
+
+    Query: {query}
+    Chunk Content: {chunk_text}
+
+    Respond with exactly a float value between 0.0 and 10.0 (e.g., 7.5) and nothing else.
+    Score:
+
+citation_check_preflight:
+  version: "1.0.0"
+  purpose: "Evaluates if the retrieved context contains sufficient information to answer the query."
+  template: |
+    Review the provided context chunks and determine if they contain sufficient information to answer the query.
+    Classify the sufficiency as:
+    - SUFFICIENT: All required information is clearly present in the context.
+    - PARTIAL: Some parts of the query can be answered, but critical information is missing.
+    - INSUFFICIENT: The context does not contain any relevant information.
+
+    Query: {query}
+    Context: {context}
+
+    Respond in this exact YAML format:
+    VERDICT: SUFFICIENT/PARTIAL/INSUFFICIENT
+    REASON: A concise explanation of the verdict.
+    GAPS: A list of missing information points if PARTIAL or INSUFFICIENT (otherwise leave empty).
+
+anti_hallucination_verifier:
+  version: "1.0.0"
+  purpose: "Audits the generated answer against the retrieval context to check for claims not supported by context."
+  template: |
+    Analyze the claims made in the answer and verify if each is supported by the context.
+    Your response must contain a checklist auditing every claim.
+    Final verdict is PASS if all claims are fully supported, or FAIL if any claim is unsupported/hallucinated.
+
+    Context:
+    {context}
+
+    Generated Answer:
+    {answer}
+
+    Respond in this exact YAML format:
+    CLAIMS_AUDIT:
+      - claim: "First claim details"
+        supported: true/false
+        evidence: "evidence quote or reason"
+    VERDICT: PASS/FAIL
+    INFERRED_FLAGS: "List of flagged claims, or None"
+
+golden_qa_generation:
+  version: "1.0.0"
+  purpose: "Generates a high-quality QA pair from a document chunk for RAG evaluation."
+  template: |
+    Given the following document chunk, generate a high-quality evaluation question and expected answer.
+    Generate a question of this type: {question_type}.
+
+    Here are the definitions of the question types:
+    - DIRECT: A question that can be answered directly using a single specific fact in the chunk.
+    - REASONING: A question that requires synthesizing multiple facts, explaining a mechanism, or summarizing a relationship within the chunk.
+    - BOUNDARY: A question related to the chunk's topic, but which CANNOT be answered from the content of the chunk. The expected answer for a BOUNDARY question MUST be the exact refusal message: "I am sorry, but I could not find any relevant information in the provided context to answer your query."
+
+    Document Chunk Content:
+    {chunk_text}
+
+    Respond in this exact YAML format:
+    TYPE: DIRECT/REASONING/BOUNDARY
+    QUESTION: "The question you generated"
+    EXPECTED_ANSWER: "The expected answer, or the refusal message for BOUNDARY type"
+    DIFFICULTY: Easy/Medium/Hard
+
+faithfulness_evaluator:
+  version: "1.0.0"
+  purpose: "Scores the RAG generated answer against the ground truth and context for evaluation."
+  template: |
+    Evaluate the quality of the generated RAG answer based on the query, context, and expected answer.
+    Score the answer on these 4 dimensions on a scale from 1.0 (worst) to 5.0 (best):
+    1. Faithfulness: Is the generated answer fully supported by the provided context? Deduct points for any hallucinated claims or assumptions not present in the context.
+    2. Correctness: Does the generated answer accurately align with the expected answer?
+    3. Completeness: Does the generated answer fully address all aspects of the user query?
+    4. Citation Quality: Are sources cited correctly using format [Source Title, Page X]? Are the citations appropriate and accurate?
+
+    Also, check for refusal accuracy:
+    - Refused: Set to true if the expected answer was a refusal and the generated answer correctly refused. Set to false if it attempted to answer or hallucinated. If expected answer was NOT a refusal, set to false.
+
+    Query: {query}
+    Context: {context}
+    Expected Answer: {expected_answer}
+    Generated Answer: {generated_answer}
+
+    Respond in this exact YAML format:
+    faithfulness: score_float
+    correctness: score_float
+    completeness: score_float
+    citation_quality: score_float
+    refused: true/false
+    reasoning: "Concise evaluation notes for each dimension"
+
+ci_failure_report_generator:
+  version: "1.0.0"
+  purpose: "Generates a detailed summary of evaluation failures for CI/CD diagnostics."
+  template: |
+    Generate a detailed CI failure report based on the RAG evaluation run results below.
+    Highlight which thresholds failed, summarize the failing test cases (query, expected answer, generated answer, and scores), and provide actionable recommendations to improve performance (e.g. prompt tuning, chunking size tweaks, weight adjustments).
+
+    Failed Thresholds & Metric Scores:
+    {failed_thresholds_details}
+
+    Failing Cases Details:
+    {failing_cases_details}
+
+    Format the output as a clean, markdown failure report with clear headers and bullet points.
+
+contradiction_detector:
+  version: "1.0.0"
+  purpose: "Detect if two chunks make conflicting claims"
+  template: |
+    You are a fact-checking analyst. Determine if the two passages below make conflicting claims about the same topic.
+
+    A contradiction exists when:
+    - Passage A states X is true, Passage B states X is false
+    - Passage A gives value/date/name N, Passage B gives a different value/date/name for the same thing
+    - Passage A recommends action X, Passage B recommends against action X
+    - The passages reach opposite conclusions from similar evidence
+
+    NOT a contradiction:
+    - Passages discussing different aspects of the same topic
+    - One passage having more detail than another
+    - Different terminology for the same concept
+    - One passage being silent on what the other addresses
+
+    Passage A [Source: {source_a}]:
+    {chunk_a}
+
+    Passage B [Source: {source_b}]:
+    {chunk_b}
+
+    Respond in this exact JSON format:
+    {{
+      "is_contradiction": <true|false>,
+      "confidence": <0.0-1.0>,
+      "contradiction_type": "<factual|recommendation|conclusion|temporal|null>",
+      "claim_a": "<the specific claim made in Passage A, one sentence>",
+      "claim_b": "<the specific claim made in Passage B, one sentence>",
+      "explanation": "<one sentence explaining the conflict or why there is none>"
+    }}
+
+perspective_extractor:
+  version: "1.0.0"
+  purpose: "Extract the position/stance a chunk takes on the query topic"
+  template: |
+    You are analyzing what position a passage takes on a topic.
+
+    Query Topic: {query}
+
+    Passage [Source: {source}]:
+    {chunk_text}
+
+    Extract:
+    1. The core POSITION this passage takes (one sentence, starting with a verb: "Supports...", "Argues...", "Recommends...", "Finds that...", "Concludes...")
+    2. The KEY EVIDENCE it uses to support that position
+    3. The CONFIDENCE of the claim (how certain is the source?)
+    4. Any CAVEATS or limitations the passage acknowledges
+
+    Respond in this exact JSON format:
+    {{
+      "position": "<one sentence position statement>",
+      "key_evidence": "<main evidence cited>",
+      "source_confidence": "<HIGH|MEDIUM|LOW>",
+      "caveats": "<limitations acknowledged, or 'none'>",
+      "stance_label": "<supports|opposes|neutral|mixed>"
+    }}
+
+multi_perspective_synthesizer:
+  version: "1.0.0"
+  purpose: "Generate a balanced answer that presents multiple perspectives"
+  template: |
+    You are a balanced research analyst. Present multiple perspectives on the question below without taking sides.
+
+    RULES:
+    1. Present each perspective fairly with equal depth
+    2. Cite every claim with its source [Doc: X | Chunk: Y]
+    3. Do not resolve the contradiction — surface it clearly
+    4. End with "POINTS OF AGREEMENT" and "POINTS OF CONFLICT"
+    5. Never say one perspective is "correct"
+    6. If perspectives share common ground, note it
+
+    Question: {user_query}
+
+    Perspective A ({perspective_a_label}):
+    {perspective_a_chunks}
+
+    Perspective B ({perspective_b_label}):
+    {perspective_b_chunks}
+
+    {additional_perspectives}
+
+    OUTPUT FORMAT:
+
+    OVERVIEW:
+    <2-3 sentences explaining that sources disagree and why this question has multiple perspectives>
+
+    PERSPECTIVE A — {perspective_a_label}:
+    <Balanced summary with inline citations>
+
+    PERSPECTIVE B — {perspective_b_label}:
+    <Balanced summary with inline citations>
+
+    {additional_perspective_sections}
+
+    POINTS OF AGREEMENT:
+    <What all perspectives agree on, with citations>
+
+    POINTS OF CONFLICT:
+    <The specific claims that directly contradict each other>
+
+    DISAGREEMENT SCORE: {disagreement_score}/10
+    <One sentence interpreting what this score means for the reliability of any single answer>
+
+disagreement_explainer:
+  version: "1.0.0"
+  purpose: "Explain WHY sources disagree when user asks"
+  template: |
+    A user asked: "{user_query}"
+
+    The following sources disagreed in their answers.
+    Explain WHY these sources might reach different conclusions.
+
+    Consider:
+    - Publication date differences (knowledge cutoff, recency)
+    - Methodological differences (how studies were conducted)
+    - Scope differences (different populations, contexts, scales)
+    - Funding/bias considerations (if apparent from text)
+    - Domain evolution (field has changed since older sources)
+    - Definitional differences (same term meaning different things)
+
+    Source summaries:
+    {source_summaries}
+
+    Contradiction detected:
+    {contradiction_explanation}
+
+    Provide:
+    1. MOST LIKELY REASON for the disagreement (2-3 sentences)
+    2. WHAT TO LOOK FOR to resolve it (what evidence would settle this question?)
+    3. PRACTICAL ADVICE (given the disagreement, what should the user do with this information?)
+
+    Keep the full response under 200 words.
+
+
+claim_extractor_prompt:
+  version: "1.0.0"
+  purpose: "Extract atomic factual claims from a passage"
+  template: |
+    You are a claim extraction engine for a research system.
+    Extract every atomic factual claim from the passage below.
+
+    An atomic claim is:
+    - A single verifiable statement of fact
+    - Self-contained (understandable without surrounding context)
+    - Specific (not vague or general)
+
+    Do NOT extract:
+    - Opinions without factual basis
+    - Questions
+    - Background context with no factual assertion
+    - Duplicate claims (if same fact stated twice, extract once)
+
+    For each claim, identify:
+    - claim_text: exact claim as stated
+    - normalized_text: canonical form (remove hedging, resolve pronouns, standardize terminology)
+    - claim_type: FACTUAL|QUANTITATIVE|CAUSAL|TEMPORAL|COMPARATIVE|RECOMMENDATION
+    - confidence: your confidence this is a real claim (0.0-1.0)
+    - span_start: character index where claim begins
+    - span_end: character index where claim ends
+
+    Passage [Chunk ID: {chunk_id} | Source: {source_title}]:
+    {chunk_text}
+
+    Respond ONLY with a JSON array:
+    [
+      {{
+        "claim_text": "<exact text>",
+        "normalized_text": "<canonical form>",
+        "claim_type": "<type>",
+        "confidence": <0.0-1.0>,
+        "span_start": <int>,
+        "span_end": <int>
+      }}
+    ]
+    Return [] if no atomic claims found.
+
+cluster_labeler_prompt:
+  version: "1.0.0"
+  purpose: "Generate human-readable label for evidence cluster"
+  template: |
+    You are labeling a group of related factual claims that all support the same position on a topic.
+
+    Query that was asked: {user_query}
+
+    Claims in this cluster:
+    {claims_list}
+
+    Generate:
+    1. LABEL: A 3-8 word label describing the position these claims collectively take.
+       Start with a verb: "Supports...", "Argues...", "Recommends...", "Finds that...", "Opposes..."
+    2. STANCE: SUPPORTS|OPPOSES|NEUTRAL|MIXED (relative to the most common interpretation of the query)
+    3. SUMMARY: One sentence summarizing the collective position.
+
+    Respond ONLY in JSON:
+    {{
+      "label": "<3-8 word label>",
+      "stance": "<SUPPORTS|OPPOSES|NEUTRAL|MIXED>",
+      "summary": "<one sentence>"
+    }}
+
+ca_rag_generator_prompt:
+  version: "1.0.0"
+  purpose: "Generate structured multi-perspective CA-RAG response"
+  template: |
+    You are a research analyst producing a balanced, citation-grounded analysis of a contested question.
+
+    ABSOLUTE RULES:
+    1. Never take sides or declare one perspective correct.
+    2. Every claim must be cited: [Doc: {title} | Claim: {claim_id}]
+    3. Present each perspective with equal analytical depth.
+    4. Areas of Agreement must cite sources from ALL clusters.
+    5. Areas of Disagreement must cite the specific conflicting claims.
+    6. The Final Balanced Summary must not introduce new information.
+    7. Do not use hedging language — state what sources say directly.
+
+    Question: {user_query}
+
+    SUPPORTING EVIDENCE CLUSTER ({support_label}):
+    Claims: {support_claims}
+    Confidence: {support_confidence}
+
+    CONTRADICTING EVIDENCE CLUSTER ({contradict_label}):
+    Claims: {contradict_claims}
+    Confidence: {contradict_confidence}
+
+    {additional_clusters}
+
+    Detected Contradictions:
+    {contradiction_pairs}
+
+    Produce this EXACT structure:
+
+    ## SUPPORTING EVIDENCE
+    <Analysis of claims supporting the primary position. Every sentence cited. 2-4 paragraphs.>
+
+    ## CONTRADICTING EVIDENCE
+    <Analysis of claims contradicting the primary position. Every sentence cited. 2-4 paragraphs.>
+
+    ## AREAS OF AGREEMENT
+    <What ALL sources agree on, regardless of their position. Bullet points with citations.>
+
+    ## AREAS OF DISAGREEMENT
+    <The specific claims that directly conflict. Format each as:
+    CONFLICT {n}: "[Cluster A] claims X [citation]. [Cluster B] claims Y [citation]."
+    Do not add extra reasoning, output only the conflicts list.>
+
+    ## FINAL BALANCED SUMMARY
+    <3-5 sentences summarizing the state of evidence. Must acknowledge the contradiction explicitly. Must not resolve the contradiction. Must cite both sides.>
+
+    ## RESPONSE CONFIDENCE
+    Overall: {overall_confidence}/10
+    Supporting Evidence: {support_confidence}/10
+    Contradicting Evidence: {contradict_confidence}/10
+    Conflict Clarity: {conflict_clarity}/10
+    Interpretation: {confidence_interpretation}
+
+ca_rag_conflict_explainer:
+  version: "1.0.0"
+  purpose: "Explain the root cause of detected contradictions"
+  template: |
+    Two clusters of evidence contradict each other on the question: "{user_query}"
+
+    Cluster A — {cluster_a_label}:
+    Representative claim: {claim_a}
+    Source metadata: {source_a_metadata}
+
+    Cluster B — {cluster_b_label}:
+    Representative claim: {claim_b}
+    Source metadata: {source_b_metadata}
+
+    NLI contradiction strength: {contradiction_strength}/1.0
+
+    Analyze WHY these sources contradict. Consider:
+    - TEMPORAL: Publication dates differ — field evolved?
+    - METHODOLOGICAL: Different study designs or datasets?
+    - SCOPE: Different populations, scales, or contexts?
+    - DEFINITIONAL: Same term used differently?
+    - DOMAIN_EVOLUTION: Older consensus overturned?
+    - FUNDING_BIAS: Source incentives differ?
+    - MEASUREMENT: Different metrics measuring same concept?
+
+    Respond in JSON:
+    {{
+      "primary_reason": "<TEMPORAL|METHODOLOGICAL|SCOPE|DEFINITIONAL|DOMAIN_EVOLUTION|FUNDING_BIAS|MEASUREMENT>",
+      "explanation": "<2-3 sentences explaining the conflict>",
+      "resolution_evidence": "<what additional evidence would resolve this contradiction>",
+      "practical_advice": "<what should the user do with this conflicting information>",
+      "confidence_in_explanation": <0.0-1.0>
+    }}
+

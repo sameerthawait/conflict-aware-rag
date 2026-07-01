@@ -1,0 +1,147 @@
+networks:
+  internal:
+    driver: bridge
+    internal: true   # ChromaDB and Redis are NOT reachable from outside Docker
+  external:
+    driver: bridge
+
+volumes:
+  chroma_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  hf_cache:
+    driver: local
+
+services:
+  # 1. RAG API Backend App Service
+  rag-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rag-system-api:latest
+    container_name: rag-api
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: on-failure
+    expose:
+      - "8000"
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - NVIDIA_API_KEY=${NVIDIA_API_KEY}
+      - NVIDIA_NIM_API_KEY=${NVIDIA_NIM_API_KEY}
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - CUDA_VISIBLE_DEVICES=0
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - CHROMA_DB_PATH=/app/data/chroma_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - INGEST_PATH=/app/data/raw
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data/raw:/app/data/raw
+      - ./data/golden_dataset:/app/data/golden_dataset
+      - chroma_data:/app/data/chroma_db
+      - ./logs:/app/logs
+      - hf_cache:/home/appuser/.cache/huggingface
+    networks:
+      - internal
+      - external
+    depends_on:
+      chromadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # 2. Chroma Vector Database Server
+  chromadb:
+    image: chromadb/chroma:0.4.24
+    container_name: chromadb
+    restart: always
+    expose:
+      - "8000"
+    # No public port — only reachable on the internal Docker network by rag-api
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/heartbeat')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # 3. Redis Cache Store
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+    command: >-
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --protected-mode yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # 4. Prometheus Scraper Metrics Engine
+  prometheus:
+    image: prom/prometheus:v2.49.1
+    container_name: prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - internal
+      - external
+    depends_on:
+      - rag-api
+
+  # 5. Grafana Dashboard Analytics UI
+  grafana:
+    image: grafana/grafana:10.3.1
+    container_name: grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - external
+    depends_on:
+      - prometheus

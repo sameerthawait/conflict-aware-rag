@@ -1,0 +1,57 @@
+[
+  {
+    "id": "q1",
+    "query": "What is the recommended daily dosage for drug AZD-9291 in NSCLC?",
+    "expected_stance_count": 2,
+    "expected_contradiction": true,
+    "topic": "oncology",
+    "expected_claims": [
+      "AZD-9291 standard daily dosage is 80mg.",
+      "AZD-9291 daily dosage is 160mg for patients with leptomeningeal metastases."
+    ]
+  },
+  {
+    "id": "q2",
+    "query": "How many Redis master nodes are required for a high-throughput cluster?",
+    "expected_stance_count": 2,
+    "expected_contradiction": true,
+    "topic": "database",
+    "expected_claims": [
+      "A minimum of 3 master nodes are required for a Redis cluster.",
+      "High-throughput enterprise workloads require 6 master nodes to prevent slot saturation."
+    ]
+  },
+  {
+    "id": "q3",
+    "query": "What is the optimal learning rate for training a Vision Transformer from scratch?",
+    "expected_stance_count": 2,
+    "expected_contradiction": true,
+    "topic": "deep_learning",
+    "expected_claims": [
+      "Vision Transformers require a learning rate of 1e-4 with AdamW.",
+      "Stable training of Vision Transformers from scratch requires a learning rate of 3e-4 with cosine decay."
+    ]
+  },
+  {
+    "id": "q4",
+    "query": "Can we use Bfloat16 mixed precision training on NVIDIA Pascal GPUs?",
+    "expected_stance_count": 2,
+    "expected_contradiction": true,
+    "topic": "hardware",
+    "expected_claims": [
+      "NVIDIA Pascal architecture does not support hardware accelerated Bfloat16.",
+      "Software emulated Bfloat16 is supported on Pascal GPUs but leads to significant performance degradation."
+    ]
+  },
+  {
+    "id": "q5",
+    "query": "Is early aggressive hydration recommended for acute pancreatitis treatment?",
+    "expected_stance_count": 2,
+    "expected_contradiction": true,
+    "topic": "medicine",
+    "expected_claims": [
+      "Early aggressive hydration decreases mortality in acute pancreatitis.",
+      "Aggressive hydration increases the risk of volume overload and does not improve clinical outcomes."
+    ]
+  }
+]

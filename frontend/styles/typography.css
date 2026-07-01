@@ -1,0 +1,105 @@
+/* Prose response typography for research document outputs */
+.prose-answer {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-primary);
+}
+
+.prose-answer p {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.prose-answer p:last-child {
+  margin-bottom: 0;
+}
+
+.prose-answer strong {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.prose-answer em {
+  font-style: italic;
+}
+
+/* Citation markers styled as inline document tags */
+.prose-answer .citation-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-citation);
+  border-left: 2px solid var(--color-citation-border);
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  margin-left: 4px;
+  margin-right: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--transition-fast) ease, border-color var(--transition-fast) ease;
+  vertical-align: middle;
+}
+
+.prose-answer .citation-marker:hover {
+  background-color: #DBEAFE;
+  border-left-color: var(--color-accent);
+}
+
+/* Code blocks and syntax coloring */
+.prose-answer code {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  background-color: var(--color-surface-2);
+  color: var(--color-text-primary);
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.prose-answer pre {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  background-color: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  overflow-x: auto;
+}
+
+.prose-answer pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-tight);
+  white-space: pre;
+  word-break: normal;
+}
+
+.prose-answer ul, .prose-answer ol {
+  margin-top: 0;
+  margin-bottom: 16px;
+  padding-left: 24px;
+}
+
+.prose-answer ul {
+  list-style-type: square;
+}
+
+.prose-answer ol {
+  list-style-type: decimal;
+}
+
+.prose-answer li {
+  margin-bottom: 6px;
+}
+.prose-answer li:last-child {
+  margin-bottom: 0;
+}

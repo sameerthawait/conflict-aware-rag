@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # 1. RAG API Backend App Service Production configuration
+  rag-api:
+    restart: always
+    ports:
+      - "8000:8000"
+    secrets:
+      - nvidia_api_key
+      - admin_api_key
+    environment:
+      - NVIDIA_API_KEY_FILE=/run/secrets/nvidia_api_key
+      - ADMIN_API_KEY_FILE=/run/secrets/admin_api_key
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - CHROMA_DB_PATH=/app/data/chroma_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - INGEST_PATH=/app/data/raw
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data/raw:/app/data/raw          # source documents
+      - chroma_data:/app/data/chroma_db   # indexed vectors
+      - ./logs:/app/logs                  # logs
+      - hf_cache:/home/appuser/.cache/huggingface
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          memory: 1G
+
+  # 2. Chroma Vector DB Production configuration
+  chromadb:
+    restart: always
+    ports: !reset []  # Removes port mapping to host, making it internal-only
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+        reservations:
+          memory: 512M
+
+  # 3. Redis Cache Store Production configuration
+  redis:
+    restart: always
+    ports: !reset []  # Removes port mapping to host, making it internal-only
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          memory: 128M
+
+# Note: Prometheus and Grafana services are omitted in production override to use cloud monitoring instead.
+
+secrets:
+  nvidia_api_key:
+    file: ./secrets/nvidia_api_key.txt
+  admin_api_key:
+    file: ./secrets/admin_api_key.txt
+
+volumes:
+  chroma_data:
+  redis_data:
+  hf_cache:
