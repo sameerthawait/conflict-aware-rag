@@ -20,7 +20,7 @@ export const useStore = create<ChatState>((set) => ({
   messages: [],
   isLoading: false,
   currentSources: [],
-  apiKey: typeof window !== "undefined" ? localStorage.getItem("rag_api_key") || "" : "",
+  apiKey: typeof window !== "undefined" ? localStorage.getItem("rag_api_key") || process.env.NEXT_PUBLIC_DEFAULT_API_KEY || "" : "",
   inputValue: "",
   
   addMessage: (message) =>

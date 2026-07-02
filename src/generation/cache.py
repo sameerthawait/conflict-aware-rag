@@ -237,7 +237,7 @@ class SemanticQueryCache:
         # Clear Redis keys
         if self.redis_client:
             try:
-                keys = list(self.redis_client.keys("cache:entry:*"))
+                keys = list(self.redis_client.keys("cache:entry:*"))  # type: ignore[arg-type]
                 if keys:
                     self.redis_client.delete(*keys)
                 logger.info("Successfully flushed Redis cache entries.")

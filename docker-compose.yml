@@ -49,6 +49,8 @@ services:
       - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
       - INGEST_PATH=/app/data/raw
       - LOG_LEVEL=INFO
+      - CHROMA_CLIENT_AUTH_PROVIDER=
+      - ANONYMIZED_TELEMETRY=False
     volumes:
       - ./data/raw:/app/data/raw
       - ./data/golden_dataset:/app/data/golden_dataset
@@ -77,6 +79,8 @@ services:
     environment:
       - IS_PERSISTENT=TRUE
       - PERSIST_DIRECTORY=/chroma/chroma
+      - ANONYMIZED_TELEMETRY=False
+      - CHROMA_TELEMETRY=False
     networks:
       - internal
     healthcheck:
