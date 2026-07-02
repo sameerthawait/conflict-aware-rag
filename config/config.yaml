@@ -69,8 +69,18 @@ security:
       tier: "premium"
       rate_limit_rpm: 100
       token_limit_tpd: 1000000
+    "fb65eda85a165f0d3dd1e14b7a6103e37499208cc4ef155551d9fb424e781021":
+      name: "env-admin-key"
+      tier: "premium"
+      rate_limit_rpm: 100
+      token_limit_tpd: 1000000
     "9d2684771c283686b0f916bf9e767caa0f80d8e25d33a72111289855eeb20d3c":
       name: "standard-key"
+      tier: "standard"
+      rate_limit_rpm: 20
+      token_limit_tpd: 100000
+    "6609d0da0d68b07be55d4cb61874134abdc2e28f6460fbb1e73f2550f7f1ccfd":
+      name: "env-standard-key"
       tier: "standard"
       rate_limit_rpm: 20
       token_limit_tpd: 100000

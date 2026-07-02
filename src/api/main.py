@@ -70,6 +70,7 @@ from src.monitoring.cost_tracker import router as cost_router, BudgetExceededErr
 import src.monitoring.cost_tracker as cost_tracker_mod
 from src.utils.secret_masker import install_secret_masker
 from src.api.response_filter import ResponseFilterMiddleware
+from src.utils.secret_loader import get_secret
 
 # Load environment variables
 load_dotenv()
@@ -175,9 +176,9 @@ def startup_event() -> None:
         raise RuntimeError("Database startup failed") from e
 
     # 5. Initialize Resilient LLM client pointing to NVIDIA NIM
-    api_key = os.environ.get("NVIDIA_API_KEY", "")
+    api_key = get_secret("NVIDIA_API_KEY", fallback_env_name="NVIDIA_NIM_API_KEY")
     if not api_key:
-        logger.warning("NVIDIA_API_KEY environment variable is not set. API calls to NVIDIA NIM will fail unless mocked.")
+        raise RuntimeError("NVIDIA API authentication key (NVIDIA_API_KEY or NVIDIA_NIM_API_KEY) is missing. Unable to initialize API server LLM client.")
     base_url = config.get("llm", {}).get("base_url", "https://integrate.api.nvidia.com/v1")
     raw_client = OpenAI(base_url=base_url, api_key=api_key)
     

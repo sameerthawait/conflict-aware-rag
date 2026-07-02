@@ -17,6 +17,7 @@ from src.utils.prompt_manager import PromptManager
 from src.retrieval.vector_store_pool import VectorStorePool, PooledChromaVectorStore
 from src.generation.llm_client import ResilientLLMClient, ResilientOpenAIWrapper
 from src.ca_rag.pipeline import CARAGPipeline
+from src.utils.secret_loader import get_secret
 
 def main():
     logger.info("Initializing CA-RAG Evaluation Runner...")
@@ -33,7 +34,7 @@ def main():
         return
 
     from openai import OpenAI
-    api_key = os.environ.get("NVIDIA_API_KEY", "")
+    api_key = get_secret("NVIDIA_API_KEY", fallback_env_name="NVIDIA_NIM_API_KEY")
     if not api_key:
         api_key = "mock-key-for-initialization"
         

@@ -140,7 +140,7 @@ class MultiPerspectiveRAGPipeline(RAGPipeline):
             
             # Execute standard pipeline synchronously
             std_start = time.perf_counter()
-            std_resp: RAGResponse = self.run_pipeline(user_query)
+            std_resp: RAGResponse = self.run_pipeline(user_query, results=results, retrieval_latencies=latencies)
             latencies["standard_generation_ms"] = (time.perf_counter() - std_start) * 1000
             
             total_ms = int((time.perf_counter() - start_time) * 1000)
@@ -189,7 +189,7 @@ class MultiPerspectiveRAGPipeline(RAGPipeline):
                 f"({self.disagreement_score_trigger}) or insufficient clusters. Routing to standard RAG."
             )
             std_start = time.perf_counter()
-            std_resp = self.run_pipeline(user_query)
+            std_resp = self.run_pipeline(user_query, results=results, retrieval_latencies=latencies)
             latencies["standard_generation_ms"] = (time.perf_counter() - std_start) * 1000
             
             total_ms = int((time.perf_counter() - start_time) * 1000)

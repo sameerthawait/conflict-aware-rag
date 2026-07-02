@@ -6,6 +6,7 @@ import re
 import yaml
 from typing import Dict, List, Any, Optional, Tuple
 from openai import OpenAI
+from src.utils.secret_loader import get_secret
 from src.ingestion.vector_store import ChromaVectorStore
 from src.utils.prompt_manager import PromptManager
 
@@ -43,7 +44,9 @@ class GoldenDatasetGenerator:
         if client is not None:
             self.client = client
         else:
-            api_key = os.environ.get("NVIDIA_API_KEY", "")
+            api_key = get_secret("NVIDIA_API_KEY", fallback_env_name="NVIDIA_NIM_API_KEY")
+            if not api_key:
+                raise RuntimeError("NVIDIA API authentication key (NVIDIA_API_KEY or NVIDIA_NIM_API_KEY) is missing. Unable to initialize GoldenDatasetGenerator LLM client.")
             base_url = config.get("llm", {}).get("base_url", "https://integrate.api.nvidia.com/v1")
             self.client = OpenAI(base_url=base_url, api_key=api_key)
 

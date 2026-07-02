@@ -106,7 +106,7 @@ class CARAGPipeline(RAGPipeline):
         # Fallback Trigger 1: Insufficient claim count
         if len(all_claims) < self.min_claims:
             logger.info(f"CA-RAG Fallback: Extracted claim count ({len(all_claims)}) is below minimum ({self.min_claims}). Triggering standard RAG.")
-            fallback_res = super().run_pipeline(user_query)
+            fallback_res = super().run_pipeline(user_query, results=results, retrieval_latencies=latencies)
             fallback_res.latencies["fallback_reason"] = "insufficient_claims"  # type: ignore[assignment]
             return fallback_res
 
@@ -119,14 +119,14 @@ class CARAGPipeline(RAGPipeline):
         # Fallback Trigger 2: No contradictions detected
         if not nli_matrix.has_contradictions:
             logger.info("CA-RAG Fallback: No contradictions found among claims. Triggering standard RAG.")
-            fallback_res = super().run_pipeline(user_query)
+            fallback_res = super().run_pipeline(user_query, results=results, retrieval_latencies=latencies)
             fallback_res.latencies["fallback_reason"] = "no_contradictions"  # type: ignore[assignment]
             return fallback_res
 
         # Fallback Trigger 3: Contradiction density below threshold
         if nli_matrix.contradiction_density < self.contra_density_threshold:
             logger.info(f"CA-RAG Fallback: Contradiction density ({nli_matrix.contradiction_density:.2f}) below threshold ({self.contra_density_threshold}). Triggering standard RAG.")
-            fallback_res = super().run_pipeline(user_query)
+            fallback_res = super().run_pipeline(user_query, results=results, retrieval_latencies=latencies)
             fallback_res.latencies["fallback_reason"] = "low_contradiction_density"  # type: ignore[assignment]
             return fallback_res
 
@@ -139,7 +139,7 @@ class CARAGPipeline(RAGPipeline):
         # Fallback Trigger 4: Less than 2 stance clusters generated
         if len(clusters) < 2:
             logger.info(f"CA-RAG Fallback: Generated cluster count ({len(clusters)}) is below 2. Triggering standard RAG.")
-            fallback_res = super().run_pipeline(user_query)
+            fallback_res = super().run_pipeline(user_query, results=results, retrieval_latencies=latencies)
             fallback_res.latencies["fallback_reason"] = "insufficient_clusters"  # type: ignore[assignment]
             return fallback_res
 

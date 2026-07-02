@@ -16,6 +16,7 @@ from src.ingestion.vector_store import ChromaVectorStore
 from src.generation.pipeline import RAGPipeline
 from src.evaluation.evaluator import RAGEvaluator
 from src.evaluation.ci_reporter import CIReporter
+from src.utils.secret_loader import get_secret
 
 
 def parse_threshold_override(arg_str: str) -> Dict[str, float]:
@@ -79,7 +80,8 @@ def main() -> None:
     threshold_overrides = parse_threshold_override(args.threshold_override)
 
     # Gracefully bypass evaluations if API key is not configured (e.g. in clean GitHub forks)
-    if not os.getenv("NVIDIA_API_KEY") and not os.getenv("ANTHROPIC_API_KEY"):
+    nvidia_key = get_secret("NVIDIA_API_KEY", fallback_env_name="NVIDIA_NIM_API_KEY")
+    if not nvidia_key and not os.getenv("ANTHROPIC_API_KEY"):
         print("==================================================", file=sys.stderr)
         print("⚠️  WARNING: NVIDIA_API_KEY is not set in environment.", file=sys.stderr)
         print("Skipping RAG Quality Evaluation Gate checks to allow CI to pass.", file=sys.stderr)

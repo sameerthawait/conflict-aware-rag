@@ -3,6 +3,7 @@ import os
 import logging
 from typing import Dict, List, Any, Tuple, Optional
 from openai import OpenAI
+from src.utils.secret_loader import get_secret
 
 from src.ingestion.vector_store import SearchResult, ChromaVectorStore
 from src.retrieval.bm25_retriever import BM25Retriever
@@ -123,7 +124,9 @@ class RAGPipeline:
         if client is not None:
             self.client = client
         else:
-            api_key = os.environ.get("NVIDIA_API_KEY", "")
+            api_key = get_secret("NVIDIA_API_KEY", fallback_env_name="NVIDIA_NIM_API_KEY")
+            if not api_key:
+                raise RuntimeError("NVIDIA API authentication key (NVIDIA_API_KEY or NVIDIA_NIM_API_KEY) is missing. Unable to initialize RAGPipeline LLM client.")
             base_url = config.get("llm", {}).get("base_url", "https://integrate.api.nvidia.com/v1")
             self.client = OpenAI(base_url=base_url, api_key=api_key)
 
@@ -146,11 +149,18 @@ class RAGPipeline:
         self.generator = Generator(config, prompt_manager, self.client)
         self.verifier = HallucinationVerifier(config, prompt_manager, self.client)
 
-    def run_pipeline(self, query: str) -> RAGResponse:
+    def run_pipeline(
+        self,
+        query: str,
+        results: Optional[List[SearchResult]] = None,
+        retrieval_latencies: Optional[Dict[str, float]] = None
+    ) -> RAGResponse:
         """Runs the entire RAG pipeline from query to verified answer.
 
         Args:
             query: The user search query.
+            results: Optional pre-fetched search results to reuse.
+            retrieval_latencies: Optional pre-computed retrieval latencies.
 
         Returns:
             A RAGResponse containing answer, citations, quality scores, and latency stats.
@@ -278,8 +288,12 @@ class RAGPipeline:
 
             # 3. RAG Required Route
             # 3a. Retrieve context
-            results, retrieval_latencies = self.hybrid_retriever.retrieve(query)
-            latencies.update(retrieval_latencies)
+            if results is None:
+                results, retrieval_latencies = self.hybrid_retriever.retrieve(query)
+                latencies.update(retrieval_latencies)
+            else:
+                if retrieval_latencies:
+                    latencies.update(retrieval_latencies)
 
             try:
                 # Observe scores and retrieve latencies

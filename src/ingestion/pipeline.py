@@ -3,6 +3,7 @@ import hashlib
 import logging
 from typing import List, Dict, Any, Optional
 from openai import OpenAI
+from src.utils.secret_loader import get_secret
 from src.ingestion.document_loader import DocumentLoader, Document
 from src.ingestion.chunker import SemanticChunker, Chunk
 from src.ingestion.vector_store import ChromaVectorStore
@@ -75,7 +76,7 @@ class IngestionPipeline:
         self.vector_store = vector_store
         
         # Only assign the client if NVIDIA_API_KEY or NVIDIA_NIM_API_KEY environment variable is set
-        api_key = os.getenv("NVIDIA_API_KEY") or os.getenv("NVIDIA_NIM_API_KEY")
+        api_key = get_secret("NVIDIA_API_KEY", fallback_env_name="NVIDIA_NIM_API_KEY")
         is_mock = client is not None and (hasattr(client, "_mock_return_value") or "Mock" in type(client).__name__)
         self.client = client if (api_key or is_mock) else None
 

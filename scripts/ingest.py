@@ -7,6 +7,7 @@ from typing import Dict, Any, List
 from openai import OpenAI
 from src.utils.config_loader import load_config
 from src.utils.prompt_manager import PromptManager
+from src.utils.secret_loader import get_secret
 from src.ingestion.document_loader import DocumentLoader
 from src.ingestion.chunker import SemanticChunker
 from src.ingestion.vector_store import ChromaVectorStore
@@ -112,7 +113,7 @@ def main() -> None:
         vector_store.initialize()
 
         # Check for NVIDIA API client setup
-        api_key = os.getenv("NVIDIA_API_KEY") or os.getenv("NVIDIA_NIM_API_KEY")
+        api_key = get_secret("NVIDIA_API_KEY", fallback_env_name="NVIDIA_NIM_API_KEY")
         client = None
         if api_key:
             client = OpenAI(

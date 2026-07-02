@@ -18,6 +18,7 @@ from src.generation.cache import SemanticQueryCache
 from src.multiperspective.pipeline import MultiPerspectiveRAGPipeline
 from src.multiperspective.benchmark import ContradictionBenchmark
 from src.evaluation.perspective_evaluator import PerspectiveEvaluator
+from src.utils.secret_loader import get_secret
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 from src.utils.secret_masker import install_secret_masker
@@ -39,7 +40,7 @@ async def main():
     # 3. Initialize OpenAI wrapper
     from openai import OpenAI
     from src.generation.llm_client import ResilientLLMClient
-    api_key = os.environ.get("NVIDIA_API_KEY", "") or os.environ.get("OPENAI_API_KEY", "") or "mock-key-for-initialization"
+    api_key = get_secret("NVIDIA_API_KEY", fallback_env_name="NVIDIA_NIM_API_KEY") or os.environ.get("OPENAI_API_KEY", "") or "mock-key-for-initialization"
     base_url = config.get("llm", {}).get("base_url", "https://integrate.api.nvidia.com/v1")
     raw_client = OpenAI(base_url=base_url, api_key=api_key)
     resilient_client = ResilientLLMClient(config, raw_client)
